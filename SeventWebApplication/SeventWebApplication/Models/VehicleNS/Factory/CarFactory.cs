@@ -29,7 +29,9 @@ namespace SeventWebApplication.Models.VehicleNS
             decimal luggageCapacity,
             FuelType fuelType,
             TransmissionType transmissionType,
-            CountryCode countryCode)
+            CountryCode countryCode,
+            PassengerCarCategoryType passengerCarCategoryType,
+            VehicleComfortType vehicleComfortType)
         {
             _regNrValidator.ValidateRegNr(regNr);
             _brandModelValidator.ValidateBrand(model.Brand.BrandName);
@@ -50,7 +52,10 @@ namespace SeventWebApplication.Models.VehicleNS
                 passengerCapacity,
                 luggageCapacity,
                 fuelType,
-                transmissionType);
+                transmissionType,
+                passengerCarCategoryType,
+                vehicleComfortType
+                );
         }
 
         public Vehicle CreateElectric(
@@ -61,7 +66,7 @@ namespace SeventWebApplication.Models.VehicleNS
             if (baseVehicle is not Car car)
             {
                 throw new ArgumentException(
-                    "BaseVehicle måste vara en Car",
+                    "BaseVehicle mï¿½ste vara en Car",
                     nameof(baseVehicle));
             }
 

@@ -10,6 +10,7 @@ namespace SeventWebApplication.Models.VehicleNS
         public TransmissionType TransmissionType { get; set; }
         public double CargoCapacityM3 { get; set; }
         public double MaxPayloadKg { get; set; }
+        public VanCategoryType VanCategoryType  { get; set; }
 
         public Van(
             RegistrationPlate registrationPlate,
@@ -22,7 +23,8 @@ namespace SeventWebApplication.Models.VehicleNS
             FuelType fuelType,
             TransmissionType transmissionType,
             double cargoCapacityM3,
-            double maxPayloadKg)
+            double maxPayloadKg,
+            VanCategoryType vanCategoryType)
             : base(
                 registrationPlate,
                 model,
@@ -36,6 +38,7 @@ namespace SeventWebApplication.Models.VehicleNS
             TransmissionType = transmissionType;
             CargoCapacityM3 = cargoCapacityM3;
             MaxPayloadKg = maxPayloadKg;
+            VanCategoryType = vanCategoryType;
         }
     }
 }

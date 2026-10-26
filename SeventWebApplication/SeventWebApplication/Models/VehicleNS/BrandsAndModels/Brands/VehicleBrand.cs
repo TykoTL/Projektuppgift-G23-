@@ -7,9 +7,9 @@
 
         public List<VehicleModel> Models { get; private set; } = new();
 
-        public List<VehicleType> SupportedTypes { get; private set; } = new();
+        public List<VehicleCategoryType> SupportedTypes { get; private set; } = new();
 
-        public VehicleBrand(string name, params VehicleType[] types)
+        public VehicleBrand(string name, params VehicleCategoryType[] types)
         {
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentException("Brand name is required.", nameof(name));

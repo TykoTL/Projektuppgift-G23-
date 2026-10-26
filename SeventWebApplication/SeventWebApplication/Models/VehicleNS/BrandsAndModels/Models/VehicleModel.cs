@@ -12,12 +12,12 @@
         // Navigation property
         public required VehicleBrand Brand { get; set; }
 
-        public List<VehicleType> SupportedTypes { get; private set; } = new();
+        public List<VehicleCategoryType> SupportedTypes { get; private set; } = new();
 
         public VehicleModel(
             string name,
             Guid brandId,
-            params VehicleType[] types)
+            params VehicleCategoryType[] types)
         {
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentException(

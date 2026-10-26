@@ -7,6 +7,8 @@ namespace SeventWebApplication.Models.VehicleNS
     {
         public FuelType FuelType { get; set; }
         public TransmissionType TransmissionType { get; set; }
+        public PassengerCarCategoryType PassengerCarCategoryType { get; set; }
+        public VehicleComfortType VehicleComfortType { get; set; }
 
         public Car(
             RegistrationPlate registrationPlate,
@@ -17,7 +19,9 @@ namespace SeventWebApplication.Models.VehicleNS
             int passengerCapacity,
             decimal luggageCapacity,
             FuelType fuelType,
-            TransmissionType transmissionType)
+            TransmissionType transmissionType,
+            PassengerCarCategoryType passengerCarCategoryType,
+            VehicleComfortType comfortType)
             : base(
                 registrationPlate,
                 model,
@@ -29,6 +33,8 @@ namespace SeventWebApplication.Models.VehicleNS
         {
             FuelType = fuelType;
             TransmissionType = transmissionType;
+            PassengerCarCategoryType = passengerCarCategoryType;
+            VehicleComfortType = comfortType;
         }
     }
 }

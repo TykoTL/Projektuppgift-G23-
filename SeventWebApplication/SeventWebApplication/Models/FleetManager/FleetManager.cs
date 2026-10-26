@@ -123,14 +123,16 @@ public class FleetManager
 
             // ÄNDRING: Ersätt med ett värde som faktiskt finns
             // i din VehicleCategoryType-enum.
-            VehicleCategoryType.SUV,
+            VehicleCategoryType.Car,
 
             2024,
             197,
             5,
             529,
             FuelType.Petrol,
-            TransmissionType.Automatic
+            TransmissionType.Automatic,
+            PassengerCarCategoryType.SUV,
+            VehicleComfortType.Standard
         );
 
         _vehicles[registrationPlate.RegNr] = vehicle;

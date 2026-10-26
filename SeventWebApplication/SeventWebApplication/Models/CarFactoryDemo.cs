@@ -30,7 +30,9 @@ namespace SeventWebApplication.Demo
             decimal luggageCapacity,
             FuelType fuelType,
             TransmissionType transmissionType,
-            CountryCode countryCode)
+            CountryCode countryCode,
+            PassengerCarCategoryType passengerCarCategoryType,
+            VehicleComfortType vehicleComfortType)
         {
             var car = (Car)_carFactory.CreateStandard(
                 regNr,
@@ -42,7 +44,9 @@ namespace SeventWebApplication.Demo
                 luggageCapacity,
                 fuelType,
                 transmissionType,
-                countryCode);
+                countryCode,
+                passengerCarCategoryType,
+                vehicleComfortType);
 
             _createdVehicles.Add(car);
             return car;
@@ -59,6 +63,8 @@ namespace SeventWebApplication.Demo
             FuelType fuelType,
             TransmissionType transmissionType,
             CountryCode countryCode,
+            PassengerCarCategoryType passengerCarCategoryType,
+            VehicleComfortType vehicleComfortType,
             int batteryCapacityKwh,
             int rangeKm)
         {
@@ -72,7 +78,9 @@ namespace SeventWebApplication.Demo
                 luggageCapacity,
                 fuelType,
                 transmissionType,
-                countryCode);
+                countryCode,
+                passengerCarCategoryType,
+                vehicleComfortType);
 
             var electricCar = (ElectricCar)_carFactory.CreateElectric(
                 baseCar,

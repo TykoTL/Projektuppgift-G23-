@@ -33,7 +33,8 @@ namespace SeventWebApplication.Models.VehicleNS
             TransmissionType transmissionType,
             double cargoCapacityM3,
             double maxPayloadKg,
-            CountryCode countryCode)
+            CountryCode countryCode,
+            VanCategoryType vanCategoryType)
         {
             // Validera indata
             _regNrValidator.ValidateRegNr(regNr);
@@ -45,7 +46,7 @@ namespace SeventWebApplication.Models.VehicleNS
             // Skapa registreringsnummer som ett value object
             var registrationPlate = new RegistrationPlate(regNr, countryCode);
 
-            // Skapa och returnera skåpbilen
+            // Skapa och returnera skï¿½pbilen
             return new Van(
                 registrationPlate,
                 model,
@@ -57,7 +58,8 @@ namespace SeventWebApplication.Models.VehicleNS
                 fuelType,
                 transmissionType,
                 cargoCapacityM3,
-                maxPayloadKg);
+                maxPayloadKg,
+                vanCategoryType);
         }
 
         public Vehicle CreateElectric(
@@ -68,7 +70,7 @@ namespace SeventWebApplication.Models.VehicleNS
             if (baseVehicle is not Van van)
             {
                 throw new ArgumentException(
-                    "BaseVehicle måste vara en Van",
+                    "BaseVehicle mï¿½ste vara en Van",
                     nameof(baseVehicle));
             }
 
