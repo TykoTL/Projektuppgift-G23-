@@ -15,8 +15,9 @@ namespace SeventWebApplication.Models.Booking
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public IAddon Addon { get; set; }
+        public string Status { get; set; } = "Pending"; // la till status så jag kudne n testa bokningar i olika status i viewern, pending e default
         //public IPricingStrategy PricingStrategy { get; set; }
-        // Status BookingStatus
+
         // Notes 
         // ApprovedBy
 

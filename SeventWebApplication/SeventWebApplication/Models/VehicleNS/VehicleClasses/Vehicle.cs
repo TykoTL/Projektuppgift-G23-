@@ -1,17 +1,24 @@
+
+using SeventWebApplication.Models.VehicleNS.Engine;
+
 namespace SeventWebApplication.Models.VehicleNS
 {
     public abstract class Vehicle
     {
-        public Guid Id { get; private set; }
+        public Guid VehicleId { get; private set; } = Guid.NewGuid();
 
         public RegistrationPlate RegistrationPlate { get; private set; }
 
         public VehicleModel Model { get; private set; }
 
-        public VehicleCategoryType VehicleCategoryType { get; private set; }
+        public static VehicleCategoryType VehicleCategoryType { get; private set; }
+
+        public TransmissionType TransmissionType { get; set; }
+
+        // Fordonet har en motor.
+        public IEngine Engine { get; private set; }
 
         public int Year { get; private set; }
-        public int HorsePower { get; private set; }
         public int PassengerCapacity { get; private set; }
         public decimal LuggageCapacity { get; private set; }
 
@@ -22,11 +29,12 @@ namespace SeventWebApplication.Models.VehicleNS
             VehicleModel model,
             VehicleCategoryType vehicleCategoryType,
             int year,
-            int horsePower,
             int passengerCapacity,
-            decimal luggageCapacity)
+            decimal luggageCapacity,
+            IEngine engine,
+            TransmissionType transmissionType)
         {
-            Id = Guid.NewGuid();
+            VehicleId = Guid.NewGuid();
 
             RegistrationPlate = registrationPlate
                 ?? throw new ArgumentNullException(nameof(registrationPlate));
@@ -34,22 +42,14 @@ namespace SeventWebApplication.Models.VehicleNS
             Model = model
                 ?? throw new ArgumentNullException(nameof(model));
 
+            Engine = engine
+                ?? throw new ArgumentNullException(nameof(engine));
+
             VehicleCategoryType = vehicleCategoryType;
-
             Year = year;
-            HorsePower = horsePower;
             PassengerCapacity = passengerCapacity;
             LuggageCapacity = luggageCapacity;
-        }
-
-        protected Vehicle(RegistrationPlate registrationPlate, VehicleModel model, int year, int horsePower, int passengerCapacity, decimal luggageCapacity)
-        {
-            RegistrationPlate = registrationPlate;
-            Model = model;
-            Year = year;
-            HorsePower = horsePower;
-            PassengerCapacity = passengerCapacity;
-            LuggageCapacity = luggageCapacity;
+            TransmissionType = transmissionType;
         }
     }
 }

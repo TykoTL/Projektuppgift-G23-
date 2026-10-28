@@ -1,6 +1,7 @@
 
 using Microsoft.AspNetCore.Mvc;
 using SeventWebApplication.Models;
+using SeventWebApplication.Models.Booking;
 using SeventWebApplication.Models.VehicleNS;
 using System.Diagnostics;
 using System.Reflection.Metadata;
@@ -47,35 +48,22 @@ namespace SeventWebApplication.Controllers
             */
 
             // NY KOD – använder FindVehicles(string query) i FleetManager.
-            var result = FleetManager.instance.FindVehicles(query);
+            //var result = FleetManager.instance.FindVehicles(query);
+            //
+            //var searchResults = result
+            //    .Select(vehicle => new VehicleSearchResult(vehicle))
+            //    .ToList();
+            //
+            //return Json(searchResults);
 
-            var searchResults = result
-                .Select(vehicle => new VehicleSearchResult(vehicle))
-                .ToList();
 
-            return Json(searchResults);
+            // NY NY KOD - använder Request objektet istället så kan man få ut specifika sub?querys från Queryn enklare (se FindVehiclesFromRequest)
+
+            //var result = VehicleAssignmentService.AssignVehiclesFromQuery( Request.Query )._vehicles;
+            var result = FleetManager.instance.FindVehiclesFromQuery( Request.Query );
+
+            return Json(result);
         }
 
-    }
-
-
-    public record VehicleSearchResult
-    {
-        public VehicleSearchResult(string brand, string model)
-        {
-            Brand = brand;
-            Model = model;
-        }
-
-        public VehicleSearchResult(Vehicle vehicle)
-        {
-            Brand = vehicle.Model.Brand.BrandName;
-            Model = vehicle.Model.ModelName;
-        }
-
-        // ÄNDRING: Egenskaper i stället för publika fält,
-        // så att JSON-serialiseringen inkluderar värdena.
-        public string Brand { get; init; }
-        public string Model { get; init; }
     }
 }

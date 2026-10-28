@@ -1,0 +1,176 @@
+@using SeventWebApplication.Models.Users
+@model BookingListViewModel
+@{
+    ViewData["Title"] = Model.IsStaff ? "Alla bokningar" : "Mina bokningar";
+    var sv = System.Globalization.CultureInfo.GetCultureInfo("sv-SE");
+
+    // Hjälpmetoder för flikarna och statusbadgen, så HTML:en nedanför blir lättare att läsa
+    string TabClass(BookingTimeStatus? s) => Model.SelectedStatus == s ? "nav-link active" : "nav-link";
+    string StatusText(BookingTimeStatus s) => s switch
+    {
+        BookingTimeStatus.Pending => "Väntande",
+        BookingTimeStatus.Confirmed => "Bekräftad",
+        BookingTimeStatus.Active => "Pågående",
+        BookingTimeStatus.Completed => "Avslutad",
+        _ => "Avbokad"
+    };
+    string StatusBadge(BookingTimeStatus s) => s switch
+    {
+        BookingTimeStatus.Pending => "bg-secondary",
+        BookingTimeStatus.Confirmed => "bg-primary",
+        BookingTimeStatus.Active => "bg-success",
+        BookingTimeStatus.Completed => "bg-dark",
+        _ => "bg-danger"
+    };
+}
+
+@* Rubrik + kort förklaring av vad man ser *@
+<div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-3">
+    <div>
+        <h2 class="mb-0">@ViewData["Title"]</h2>
+        <small class="text-muted">
+            @(Model.IsStaff ? "Du ser alla kunders bokningar." : "Här ser du bokningarna som är dina.")
+        </small>
+    </div>
+
+    @* Sökrutan finns bara för personal *@
+    @if (Model.IsStaff)
+    {
+        <form method="get" asp-action="Index" class="d-flex gap-2">
+            @if (Model.SelectedStatus != null)
+            {
+                <input type="hidden" name="status" value="@(Model.SelectedStatus.Value.ToString().ToLower())" />
+            }
+            <input class="form-control" type="search" name="search" value="@Model.Search"
+                   placeholder="Sök kund, regnr, bil..." aria-label="Sök bokningar" />
+            <button class="btn btn-primary" type="submit">Sök</button>
+            @if (!string.IsNullOrEmpty(Model.Search))
+            {
+                <a class="btn btn-outline-secondary" asp-action="Index"
+                   asp-route-status="@(Model.SelectedStatus?.ToString().ToLower())">Rensa</a>
+            }
+        </form>
+    }
+</div>
+
+@* Flikar för att filtrera på status, siffrorna visar hur många som finns i varje *@
+<ul class="nav nav-pills mb-3">
+    <li class="nav-item">
+        <a class="@TabClass(null)" asp-action="Index" asp-route-search="@Model.Search">
+            Alla <span class="badge bg-light text-dark">@Model.CountAll</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="@TabClass(BookingTimeStatus.Pending)" asp-action="Index" asp-route-status="pending" asp-route-search="@Model.Search">
+            Väntande <span class="badge bg-light text-dark">@Model.CountPending</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="@TabClass(BookingTimeStatus.Confirmed)" asp-action="Index" asp-route-status="confirmed" asp-route-search="@Model.Search">
+            Bekräftade <span class="badge bg-light text-dark">@Model.CountConfirmed</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="@TabClass(BookingTimeStatus.Active)" asp-action="Index" asp-route-status="active" asp-route-search="@Model.Search">
+            Pågående <span class="badge bg-light text-dark">@Model.CountActive</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="@TabClass(BookingTimeStatus.Completed)" asp-action="Index" asp-route-status="completed" asp-route-search="@Model.Search">
+            Avslutade <span class="badge bg-light text-dark">@Model.CountCompleted</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="@TabClass(BookingTimeStatus.Cancelled)" asp-action="Index" asp-route-status="cancelled" asp-route-search="@Model.Search">
+            Avbokade <span class="badge bg-light text-dark">@Model.CountCancelled</span>
+        </a>
+    </li>
+</ul>
+
+@if (Model.Bookings.Count == 0)
+{
+    @* Tomt läge, så det inte bara blir en tom tabell *@
+    <div class="alert alert-light border text-center py-4">
+        @if (!string.IsNullOrEmpty(Model.Search))
+        {
+            <span>Inga bokningar matchar "<strong>@Model.Search</strong>".</span>
+        }
+        else if (Model.SelectedStatus != null)
+        {
+            <span>Inga bokningar med den statusen.</span>
+        }
+        else
+        {
+            <span>Det finns inga bokningar än.</span>
+        }
+    </div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Bokning</th>
+                    @if (Model.IsStaff)
+                    {
+                        <th>Kund</th>
+                    }
+                    <th>Bil</th>
+                    <th>Period</th>
+                    <th>Tillval</th>
+                    <th class="text-end">Pris</th>
+                    <th>Status</th>
+                </tr>
+
+            </thead>
+            <tbody>
+                @foreach (var b in Model.Bookings)
+                {
+                    <tr>
+                        <td><code title="@b.BookingId">#@b.ShortId</code></td>
+
+                        @if (Model.IsStaff)
+                        {
+                            <td>
+                                <div>@b.CustomerName</div>
+                                <small class="text-muted">@b.CustomerMail</small>
+                            </td>
+                        }
+
+                        <td>
+                            <div>@b.Vehicle</div>
+                            <small class="text-muted">@b.RegNr</small>
+                        </td>
+
+                        <td>
+                            <div>@b.Start.ToString("d MMM HH:mm", sv) – @b.End.ToString("d MMM HH:mm", sv)</div>
+                            <small class="text-muted">@b.Days @(b.Days == 1 ? "dag" : "dagar")</small>
+                        </td>
+
+                        <td>
+                            @if (b.Addons.Count == 0)
+                            {
+                                <span class="text-muted">–</span>
+                            }
+                            else
+                            {
+                                foreach (var addon in b.Addons)
+                                {
+                                    <span class="badge rounded-pill bg-light text-dark border me-1">@addon</span>
+                                }
+                            }
+                        </td>
+
+                        <td class="text-end text-nowrap">
+                            @(b.TotalPrice is null ? "–" : b.TotalPrice.Value.ToString("N0", sv) + " kr")
+                        </td>
+
+                        <td><span class="badge @StatusBadge(b.Status)">@StatusText(b.Status)</span></td>
+                    </tr>
+
+                }
+            </tbody>
+        </table>
+    </div>
+}

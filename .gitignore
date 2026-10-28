@@ -34,3 +34,7 @@ x86/
 .DS_Store
 Thumbs.db
 desktop.ini
+/SeventWebApplication/SeventWebApplication/obj/project.assets.json
+/SeventWebApplication/SeventWebApplication/obj/project.nuget.cache
+/SeventWebApplication/SeventWebApplication/obj/SeventWebApplication.csproj.nuget.dgspec.json
+/SeventWebApplication/SeventWebApplication/obj/SeventWebApplication.csproj.nuget.g.props

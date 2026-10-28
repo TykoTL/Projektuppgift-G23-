@@ -1,0 +1,173 @@
+@using SeventWebApplication.Models.Users
+@using SeventWebApplication.Controllers
+@model UserListViewModel
+@{
+    ViewData["Title"] = "Användarhantering";
+
+    // Hjälpmetoder så HTML:en nedanför blir lättare att läsa
+    string TabClass(Role? r) => Model.SelectedRole == r ? "nav-link active" : "nav-link";
+    string RoleBadge(Role r) => r switch
+    {
+        Role.Admin => "bg-dark",
+        Role.Employee => "bg-primary",
+        _ => "bg-light text-dark border"
+    };
+    string RoleLabel(Role r)
+    {
+        string text = UsersController.RoleText(r);
+        return char.ToUpper(text[0]) + text[1..];
+    }
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-3">
+    <div>
+        <h2 class="mb-0">Användarhantering</h2>
+        <small class="text-muted">Skapa och hantera användare</small>
+    </div>
+    <a class="btn btn-primary" asp-action="Create">+ Ny användare</a>
+</div>
+
+@* Meddelanden efter att man gjort nåt (skickas med TempData efter redirect) *@
+@if (TempData["Success"] is string success)
+{
+    <div class="alert alert-success alert-dismissible fade show">
+        @success
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Stäng"></button>
+    </div>
+}
+@if (TempData["Error"] is string error)
+{
+    <div class="alert alert-danger alert-dismissible fade show">
+        @error
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Stäng"></button>
+    </div>
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    @* Flikar för att filtrera på roll *@
+    <ul class="nav nav-pills">
+        <li class="nav-item">
+            <a class="@TabClass(null)" asp-action="Index" asp-route-search="@Model.Search">
+                Alla <span class="badge bg-light text-dark">@Model.CountAll</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="@TabClass(Role.Customer)" asp-action="Index" asp-route-role="Customer" asp-route-search="@Model.Search">
+                Kunder <span class="badge bg-light text-dark">@Model.CountCustomers</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="@TabClass(Role.Employee)" asp-action="Index" asp-route-role="Employee" asp-route-search="@Model.Search">
+                Anställda <span class="badge bg-light text-dark">@Model.CountEmployees</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="@TabClass(Role.Admin)" asp-action="Index" asp-route-role="Admin" asp-route-search="@Model.Search">
+                Admin <span class="badge bg-light text-dark">@Model.CountAdmins</span>
+            </a>
+        </li>
+    </ul>
+
+    @* Sök *@
+    <form method="get" asp-action="Index" class="d-flex gap-2">
+        @if (Model.SelectedRole != null)
+        {
+            <input type="hidden" name="role" value="@(Model.SelectedRole.ToString())" />
+        }
+        <input class="form-control" type="search" name="search" value="@Model.Search"
+               placeholder="Sök namn, mail, telefon..." aria-label="Sök användare" />
+        <button class="btn btn-outline-primary" type="submit">Sök</button>
+        @if (!string.IsNullOrEmpty(Model.Search))
+        {
+            <a class="btn btn-outline-secondary" asp-action="Index" asp-route-role="@(Model.SelectedRole?.ToString())">Rensa</a>
+        }
+    </form>
+</div>
+
+@if (Model.Users.Count == 0)
+{
+    <div class="alert alert-light border text-center py-4">
+        @(string.IsNullOrEmpty(Model.Search) ? "Inga användare här." : $"Ingen användare matchar \"{Model.Search}\".")
+    </div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Namn</th>
+                    <th>Kontakt</th>
+                    <th>Roll</th>
+                    <th class="text-center">Bokningar</th>
+                    <th>Status</th>
+                    <th class="text-end">Åtgärder</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var row in Model.Users)
+                {
+                    var u = row.User;
+
+                    @* Inaktiva konton blir lite gråa så de syns tydligt *@
+                    <tr class="@(u.IsActive ? "" : "text-muted")">
+                        <td>
+                            @u.Name
+                            @if (row.IsMe)
+                            {
+                                <span class="badge bg-light text-dark border ms-1">du</span>
+                            }
+                        </td>
+                        <td>
+                            <div>@u.Mail</div>
+                            <small class="text-muted">@(string.IsNullOrEmpty(u.Phone) ? "–" : u.Phone)</small>
+                        </td>
+                        <td><span class="badge @RoleBadge(u.Role)">@RoleLabel(u.Role)</span></td>
+                        <td class="text-center">
+                            @* Klick på siffran tar en till bokningssidan, sökt på användarens mail *@
+                            @if (row.BookingCount > 0)
+                            {
+                                <a asp-controller="Bookings" asp-action="Index" asp-route-search="@u.Mail">@row.BookingCount</a>
+                            }
+                            else
+                            {
+                                <span class="text-muted">0</span>
+                            }
+                        </td>
+                        <td>
+                            @if (u.IsActive)
+                            {
+                                <span class="badge bg-success">Aktiv</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">Inaktiv</span>
+                            }
+                        </td>
+                        <td class="text-end text-nowrap">
+                            <a class="btn btn-sm btn-outline-primary" asp-action="Edit" asp-route-id="@u.UserId">Redigera</a>
+
+                            @* Man kan inte inaktivera sig själv, då gömmer vi knappen helt *@
+                            @if (!row.IsMe)
+                            {
+                                if (u.IsActive)
+                                {
+                                    <form asp-action="Deactivate" asp-route-id="@u.UserId" method="post" class="d-inline"
+                                          onsubmit="return confirm('Inaktivera @u.Name? Personen kan inte logga in förrän kontot aktiveras igen.');">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">Inaktivera</button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <form asp-action="Reactivate" asp-route-id="@u.UserId" method="post" class="d-inline">
+                                        <button type="submit" class="btn btn-sm btn-outline-success">Aktivera</button>
+                                    </form>
+                                }
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

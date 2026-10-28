@@ -1,4 +1,5 @@
-﻿@using SeventWebApplication
+@inject SeventWebApplication.Models.Users.UserSession UserSession
+@using SeventWebApplication
 @using SeventWebApplication.Models
 
 <!DOCTYPE html>
@@ -42,6 +43,39 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
+                        @* Bokningsvisaren syns bara när man är inloggad. Personal ser alla, kunder sina egna *@
+                        @if (UserSession.CurrentUser is SeventWebApplication.Models.Users.IBookingViewer)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Bookings" asp-action="Index">
+                                    @(UserSession.CurrentUser is SeventWebApplication.Models.Users.IBookingManager ? "Alla bokningar" : "Mina bokningar")
+                                </a>
+                            </li>
+                        }
+                        @* Användarhantering, bara för admin *@
+                        @if (UserSession.CurrentUser is SeventWebApplication.Models.Users.IAccountManager)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Users" asp-action="Index">Användarhantering</a>
+                            </li>
+                        }
+                    </ul>
+                    @* Inloggad? Visa namn + logga ut. Annars en länk till inloggningen *@
+                    @{ var currentUser = UserSession.CurrentUser; }
+                    <ul class="navbar-nav">
+                        @if (currentUser != null)
+                        {
+                            <li class="nav-item"><span class="nav-link text-dark">@currentUser.Name (@currentUser.Role)</span></li>
+                            <li class="nav-item">
+                                <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-link nav-link text-dark">Logga ut</button>
+                                </form>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item"><a class="nav-link text-dark" asp-controller="Account" asp-action="Login">Logga in</a></li>
+                        }
                     </ul>
                 </div>
             </div>

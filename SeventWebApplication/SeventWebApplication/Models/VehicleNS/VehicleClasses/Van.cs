@@ -1,25 +1,27 @@
+
+using SeventWebApplication.Models.VehicleNS.Engine;
+
 namespace SeventWebApplication.Models.VehicleNS
 {
     public class Van : Vehicle,
         IPassengerVehicle,
-        IFuelType,
         IVehicleTransmissionType,
         ICargoVehicle
     {
-        public FuelType FuelType { get; set; }
-        public TransmissionType TransmissionType { get; set; }
         public double CargoCapacityM3 { get; set; }
         public double MaxPayloadKg { get; set; }
+
+        public VanCategoryType VanCategoryType { get; private set; }
 
         public Van(
             RegistrationPlate registrationPlate,
             VehicleModel model,
             VehicleCategoryType vehicleCategoryType,
+            VanCategoryType vanCategoryType,
             int year,
-            int horsePower,
             int passengerCapacity,
             decimal luggageCapacity,
-            FuelType fuelType,
+            IEngine engine,
             TransmissionType transmissionType,
             double cargoCapacityM3,
             double maxPayloadKg)
@@ -28,12 +30,12 @@ namespace SeventWebApplication.Models.VehicleNS
                 model,
                 vehicleCategoryType,
                 year,
-                horsePower,
                 passengerCapacity,
-                luggageCapacity)
+                luggageCapacity,
+                engine,
+                transmissionType)
         {
-            FuelType = fuelType;
-            TransmissionType = transmissionType;
+            VanCategoryType = vanCategoryType;
             CargoCapacityM3 = cargoCapacityM3;
             MaxPayloadKg = maxPayloadKg;
         }

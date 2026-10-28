@@ -1,7 +1,10 @@
 ﻿
+using SeventWebApplication.Controllers;
 using SeventWebApplication.Models.Booking;
 using SeventWebApplication.Models.VehicleNS;
+using SeventWebApplication.Models.VehicleNS.Engine;
 using System;
+using System.Collections.ObjectModel;
 
 public class FleetManager
 {
@@ -13,7 +16,8 @@ public class FleetManager
         get { return _instance ??= new FleetManager(); }
     }
 
-    private Dictionary<string, Vehicle> _vehicles = new();// <reg-num, vehicle>
+    private Dictionary<string, Vehicle> _vehicles = new(StringComparer.OrdinalIgnoreCase);// <reg-num, vehicle>
+
     private List<Booking> _bookings = new();
 
     // Private constructor so only one instance can be created (using the instance getter)
@@ -46,6 +50,29 @@ public class FleetManager
         }
 
         return availableVehicles;
+    }
+
+    // Returns a list of Vehicles based on a query collection (probably from a HttpRequest)
+    public IEnumerable<Vehicle> FindVehiclesFromQuery( IQueryCollection query )
+    {
+        List<Vehicle> results = new();
+
+        // replace okt -> oct för att parsing ska fungera
+        string datePickup = $"{query["datePickup"].ToString().Replace( 'k', 'c' )} {query["timePickup"].ToString()}";
+        string dateReturn = $"{query["dateReturn"].ToString().Replace( 'k', 'c' )} {query["timeReturn"].ToString()}";
+
+        DateTime pickupDate = DateTime.Parse( $"2026 {datePickup}" );
+        DateTime returnDate = DateTime.Parse( $"2026 {dateReturn}" );
+
+        Console.WriteLine( pickupDate );
+        Console.WriteLine( returnDate );
+
+        foreach( Vehicle v in GetAvailableVehicles( pickupDate, returnDate ) )
+        {
+            results.Add(v);
+        }
+
+        return results;
     }
 
     // NYTT: Söker fordon utifrån bilmärke eller modell.
@@ -105,8 +132,6 @@ public class FleetManager
     {
         var brand = new VehicleBrand("Volvo");
 
-        // ÄNDRING: VehicleModel tar emot ett Guid (BrandId),
-        // inte ett VehicleBrand-objekt.
         var model = new VehicleModel("V60", brand.BrandId)
         {
             Brand = brand
@@ -117,23 +142,55 @@ public class FleetManager
             CountryCode.SE
         );
 
+        // Skapa motorn separat
+        IEngine engine = new PetrolEngine(
+            197,  // HorsePower
+            50    // FuelCapacityLiters
+        );
+
         var vehicle = new Car(
             registrationPlate,
             model,
-
-            // ÄNDRING: Ersätt med ett värde som faktiskt finns
-            // i din VehicleCategoryType-enum.
-            VehicleCategoryType.SUV,
-
+            VehicleCategoryType.PassengerCar,
+            SeventWebApplication.Models.VehicleNS.PassengerCarCategoryType.StationWagon,
+            SeventWebApplication.Models.VehicleNS.VehicleComfortType.Economy,
             2024,
-            197,
             5,
-            529,
-            FuelType.Petrol,
+            529m,
+            engine,
             TransmissionType.Automatic
         );
 
         _vehicles[registrationPlate.RegNr] = vehicle;
     }
 
+    public record VehicleSearchResult
+    {
+        public VehicleSearchResult( string brand, string model )
+        {
+            Brand = brand;
+            Model = model;
+        }
+
+        public VehicleSearchResult( Vehicle vehicle )
+        {
+            Brand = vehicle.Model.Brand.BrandName;
+            Model = vehicle.Model.ModelName;
+        }
+
+        // ÄNDRING: Egenskaper istället för publika fält,
+        // så att JSON-serialiseringen inkluderar värdena.
+        public string Brand { get; init; }
+        public string Model { get; init; }
+    }
+    //för families 
+    public IEnumerable<Vehicle> GetAllVehicles()
+    {
+        return _vehicles.Values.ToList();
+    }
+
+    public Vehicle? GetVehicle(Guid id)
+    {
+        return _vehicles.Values.FirstOrDefault(vehicle => vehicle.VehicleId == id);
+    }
 }

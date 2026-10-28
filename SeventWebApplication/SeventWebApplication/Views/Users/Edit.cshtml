@@ -1,0 +1,65 @@
+@using SeventWebApplication.Models.Users
+@using SeventWebApplication.Controllers
+@model EditUserViewModel
+@{
+    ViewData["Title"] = "Redigera användare";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-7 col-lg-5">
+        <a asp-action="Index" class="text-decoration-none">&larr; Tillbaka till användare</a>
+        <h2 class="mt-2">@Model.User.Name</h2>
+        <p class="text-muted mb-3">
+            @(Model.User.IsActive ? "Aktivt konto" : "Inaktiverat konto")
+        </p>
+
+        @if (ViewBag.Error != null)
+        {
+            <div class="alert alert-danger">@ViewBag.Error</div>
+        }
+
+        @* Vanliga name-attribut istället för asp-for, så de matchar EditUserForm direkt *@
+        <form asp-action="Edit" method="post">
+            <input type="hidden" name="UserId" value="@Model.Form.UserId" />
+
+            <div class="mb-3">
+                <label class="form-label" for="mail">E-post</label>
+                @* Mailen visas men går inte att ändra, den används för inloggning *@
+                <input class="form-control" id="mail" value="@Model.User.Mail" disabled />
+                <div class="form-text">Går inte att ändra eftersom den används för att logga in.</div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label" for="name">Namn</label>
+                <input class="form-control" id="name" name="Name" value="@Model.Form.Name" required />
+            </div>
+            <div class="mb-3">
+                <label class="form-label" for="phone">Telefon</label>
+                <input class="form-control" id="phone" name="Phone" value="@Model.Form.Phone" />
+            </div>
+            <div class="mb-4">
+                <label class="form-label" for="role">Roll</label>
+                @if (Model.CanChangeRole)
+                {
+                    <select class="form-select" id="role" name="Role">
+                        @foreach (var role in AccountService.AssignableRoles)
+                        {
+                            <option value="@role" selected="@(role == Model.Form.Role)">@UsersController.RoleText(role)</option>
+                        }
+                    </select>
+                }
+                else
+                {
+                    @* Låst rollväljare + gömt fält, annars skickas ingen roll med och den skulle tolkas som "Customer" *@
+                    <input class="form-control" id="role" value="@UsersController.RoleText(Model.User.Role)" disabled />
+                    <input type="hidden" name="Role" value="@Model.User.Role" />
+                    <div class="form-text">
+                        @(Model.IsMe ? "Du kan inte byta roll på dig själv." : "Admin-kontot kan inte byta roll.")
+                    </div>
+                }
+            </div>
+
+            <button class="btn btn-primary" type="submit">Spara</button>
+            <a class="btn btn-outline-secondary" asp-action="Index">Avbryt</a>
+        </form>
+    </div>
+</div>
